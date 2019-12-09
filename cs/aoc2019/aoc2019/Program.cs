@@ -10,9 +10,10 @@ namespace aoc2019
         {
             Console.WriteLine("Advent of Code 2019");
 
-            Day1Part1();
-            Day1Part2();
-
+//            Day1Part1();
+//            Day1Part2();
+            Day2Part1();
+            Day2Part2();
         }
 
         private static void Day1Part1()
@@ -38,6 +39,45 @@ namespace aoc2019
 
             var fuelTotal = moduleMasses.Sum(m => FullyFuelRequired(m));
             Console.WriteLine($"Total fuel required = {fuelTotal}");
+            Console.Write("Hit return to quit");
+            Console.ReadLine();
+        }
+
+        private const string InputFile2 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input2.txt";
+
+        private static void Day2Part1()
+        {
+            Console.WriteLine("Day 2, Part 1:\n");
+            var computer = new Computer(InputFile2);
+
+            computer.Prime(12, 2);
+            computer.ExecuteProgram();
+            var result = computer.ReadOut();
+
+            Console.WriteLine($"Result = {result}");
+            Console.Write("Hit return to quit");
+            Console.ReadLine();
+        }
+
+        private static void Day2Part2()
+        {
+            const int WantedResult = 19690720;
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 100; j++)
+                {
+                    var computer = new Computer(InputFile2);
+                    computer.Prime(i, j);
+                    computer.ExecuteProgram(0);
+                    var result = computer.ReadOut();
+                    Console.WriteLine($"Input: ({i},{j}), Output: {result}");
+                    if (result == WantedResult)
+                    {
+                        Console.WriteLine("Wanted result achieved!");
+                        break;
+                    }
+                }
+            }
             Console.Write("Hit return to quit");
             Console.ReadLine();
         }
