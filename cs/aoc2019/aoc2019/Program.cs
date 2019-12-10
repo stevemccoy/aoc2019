@@ -9,13 +9,13 @@ namespace aoc2019
         private const string InputFile1 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input1.txt";
         private const string InputFile2 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input2.txt";
 
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("Advent of Code 2019");
 
-//            Day1Part1();
-//            Day1Part2();
-//            Day2Part1();
+            Day1Part1();
+            Day1Part2();
+            Day2Part1();
             Day2Part2();
         }
 
@@ -65,6 +65,7 @@ namespace aoc2019
             const int wantedResult = 19690720;
             var computer = new Computer(InputFile2);
             var initialState = computer.SaveState();
+            var done = false;
 
             for (var i = 0; i < 100; i++)
             {
@@ -78,8 +79,13 @@ namespace aoc2019
                     if (result == wantedResult)
                     {
                         Console.WriteLine("Wanted result achieved!");
+                        done = true;
                         break;
                     }
+                }
+                if (done)
+                {
+                    break;
                 }
             }
             Console.Write("Hit return to quit");

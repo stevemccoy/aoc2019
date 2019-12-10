@@ -32,7 +32,7 @@ namespace aoc2019
         public int ExecuteInstruction()
         {
             var instruction = Read(m_ip++);
-            var retcode = -1;
+            int retcode;
             int arg1, arg2, destination, result;
             switch (instruction)
             {
@@ -98,18 +98,18 @@ namespace aoc2019
         private (int, int) GrabTwoAddresses(int pos)
         {
             var arg1 = Read(pos++);
-            var arg2 = Read(pos++);
+            var arg2 = Read(pos);
             return (arg1, arg2);
         }
 
-        public void ReadFromFile(string fileName)
+        private void ReadFromFile(string fileName)
         {
             Clear();
             var file = new StreamReader(fileName);
             while (!file.EndOfStream)
             {
                 var line = file.ReadLine();
-                var lineCodes = line.Trim().Split(',').Select(s => s.Trim());
+                var lineCodes = line?.Trim().Split(',').Select(s => s.Trim());
                 AppendCodes(lineCodes);
             }
             file.Close();
@@ -132,10 +132,10 @@ namespace aoc2019
                     m_core.Add(numCode);
                 }
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 Console.WriteLine($"Error reading Computer codes from file: Non-numeric code at position {pos}");
-                throw e;
+                throw;
             }
         }
 
