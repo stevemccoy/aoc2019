@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace aoc2019
 {
@@ -35,10 +33,7 @@ namespace aoc2019
         {
             var instruction = Read(m_ip++);
             var retcode = -1;
-            var arg1 = 0;
-            var arg2 = 0;
-            var destination = 0;
-            var result = 0;
+            int arg1, arg2, destination, result;
             switch (instruction)
             {
                 case 1:
@@ -70,7 +65,7 @@ namespace aoc2019
             return retcode;
         }
 
-        public int ExecuteProgram(int pos = 0)
+        public int ExecuteProgram(int pos)
         {
             m_ip = pos;
             var retcode = 1;
@@ -127,7 +122,7 @@ namespace aoc2019
 
         private void AppendCodes(IEnumerable<string> codes)
         {
-            int pos = 0;
+            var pos = 0;
             try
             {
                 foreach (var code in codes)
@@ -148,7 +143,7 @@ namespace aoc2019
         {
             try
             {
-                int value = m_core[pos];
+                var value = m_core[pos];
                 return value;
             }
             catch (Exception)
@@ -173,7 +168,7 @@ namespace aoc2019
 
         private int m_ip;
 
-        public object StateString()
+        public string StateString()
         {
             return string.Join(',', m_core.Select(i => i.ToString()));
         }
@@ -187,6 +182,17 @@ namespace aoc2019
         public int ReadOut()
         {
             return Read(0);
+        }
+
+        public List<int> SaveState()
+        {
+            return m_core.ToList();
+        }
+
+        public void LoadState(List<int> state)
+        {
+            m_core.Clear();
+            m_core.AddRange(state);
         }
     }
 }

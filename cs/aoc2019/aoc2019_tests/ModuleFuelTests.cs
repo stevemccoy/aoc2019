@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using NUnit.Framework;
 using aoc2019;
+using NUnit.Framework;
 
-namespace Tests
+namespace aoc2019_tests
 {
     public class ModuleFuelTests
     {
@@ -19,7 +17,7 @@ namespace Tests
         [TestCase(100756, 33583)]
         public void ModuleFuelTest(int mass, int expectedFuel)
         {
-            var actualFuel = aoc2019.Program.FuelRequired(mass);
+            var actualFuel = Program.FuelRequired(mass);
             Assert.AreEqual(expectedFuel, actualFuel);
         }
 
@@ -28,7 +26,7 @@ namespace Tests
         [TestCase(100756, 50346)]
         public void FullyFuelRequiredTest(int moduleMass, int expectedFuel)
         {
-            var actualFuel = aoc2019.Program.FullyFuelRequired(moduleMass);
+            var actualFuel = Program.FullyFuelRequired(moduleMass);
             Assert.AreEqual(expectedFuel, actualFuel);
         }
 
@@ -38,14 +36,14 @@ namespace Tests
         {
             var program = code.Split(',').Select(s => int.Parse(s));
             var computer = new Computer(program);
-            int retCode = 0;
+            var retCode = 0;
             try
             {
                 retCode = computer.ExecuteProgram(0);
             }
             catch (MultipleAssertException e)
             {
-                Assert.Fail($"Program execution failed abnormally {e.ToString()}");
+                Assert.Fail($"Program execution failed abnormally {e}");
             }
             Assert.True(retCode == 0, $"Program terminated with nonzero return value {retCode}");
         }
@@ -59,14 +57,14 @@ namespace Tests
         {
             var program = start.Split(',').Select(s => int.Parse(s));
             var computer = new Computer(program);
-            int retCode = 0;
+            var retCode = 0;
             try
             {
                 retCode = computer.ExecuteProgram(0);
             }
             catch (MultipleAssertException e)
             {
-                Assert.Fail($"Program execution failed abnormally {e.ToString()}");
+                Assert.Fail($"Program execution failed abnormally {e}");
             }
             Assert.True(retCode == 0, $"Program terminated with nonzero return value {retCode}");
             Assert.AreEqual(end, computer.StateString());
