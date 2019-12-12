@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace aoc2019
 {
@@ -8,15 +10,19 @@ namespace aoc2019
     {
         private const string InputFile1 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input1.txt";
         private const string InputFile2 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input2.txt";
+        private const string InputFile3 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input3.txt";
 
         static void Main()
         {
             Console.WriteLine("Advent of Code 2019");
 
+/*
             Day1Part1();
             Day1Part2();
             Day2Part1();
             Day2Part2();
+*/
+            Day3();
         }
 
         private static void Day1Part1()
@@ -90,6 +96,96 @@ namespace aoc2019
             }
             Console.Write("Hit return to quit");
             Console.ReadLine();
+        }
+
+        private static void Day3()
+        {
+            var lines = File.ReadAllLines(InputFile3);
+            var paths = new List<Path>();
+            var id = 1;
+            var intersections = new Dictionary<(int,int), HashSet<(int, int)>>();
+            var crossings = new Dictionary<(int, int), int>();
+
+            foreach (var line in lines)
+            {
+                var path = new Path(line, id++);
+                paths.Add(path);
+                path.TraceMoves(id);
+            }
+
+            foreach (var firstPath in paths)
+            {
+                foreach (var secondPath in paths)
+                {
+                    if (secondPath.Id > firstPath.Id)
+                    {
+                        var cross = Intersections(firstPath, secondPath);
+                        if (cross.Count > 0)
+                        {
+                            intersections[(firstPath.Id, secondPath.Id)] = cross.Keys.ToHashSet();
+                            foreach (var (key, value) in cross)
+                            {
+                                crossings[key] = value;
+                            }
+                        }
+                    }
+                }
+            }
+
+            int minDistance = int.MaxValue;
+            (int, int) closestTuple = (int.MaxValue, int.MaxValue);
+            foreach (var item in intersections.Values)
+            {
+                foreach (var p in item)
+                {
+                    var d = Manhattan((0, 0), (p.Item1, p.Item2));
+                    if (d < minDistance)
+                    {
+                        minDistance = d;
+                        closestTuple = p;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Part 1: Closest Tuple at distance {minDistance}, {closestTuple}");
+
+            // Part 2 stuff.
+
+            minDistance = int.MaxValue;
+            var minCrossing = (int.MaxValue, int.MaxValue);
+
+            foreach (var crossing in crossings)
+            {
+                if (crossing.Value < minDistance)
+                {
+                    minDistance = crossing.Value;
+                    minCrossing = crossing.Key;
+                }
+            }
+
+            Console.WriteLine($"Part 2: Closest crossing at distance {minDistance}, location: {minCrossing}.");
+
+        }
+
+        private static int Manhattan((int, int) point1, (int, int) point2)
+        {
+            var d = Math.Abs(point1.Item1 - point2.Item1);
+            d += Math.Abs(point1.Item2 - point2.Item2);
+            return d;
+        }
+
+        private static Dictionary<(int, int), int> Intersections(Path firstPath, Path secondPath)
+        {
+            var result = new Dictionary<(int, int), int>();
+            foreach (var p in firstPath.Seen.Keys)
+            {
+                if (secondPath.Seen.ContainsKey(p))
+                {
+                    result[p] = firstPath.Seen[p] + secondPath.Seen[p];
+                }
+            }
+
+            return result;
         }
 
         private static int[] ReadInputMasses()
