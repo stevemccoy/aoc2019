@@ -9,65 +9,28 @@ namespace aoc2019
     {
         public Computer(string fileName)
         {
-            m_core = new List<int>();
-            m_ip = 0;
+            Initialize();
             ReadFromFile(fileName);
         }
 
         public Computer(IEnumerable<int> codes)
         {
-            m_core = codes.ToList();
-            m_ip = 0;
+            Initialize();
+            mCore = codes.ToList();
+            mIp = 0;
         }
 
-        /*
-            Execute a single instruction at the current instruction pointer, m_ip.
-
-            Returns:
-            
-            1 if correctly executed, 
-            0 if program terminated normally,
-            -1 or other value if something went wrong.
-         */
-        public int ExecuteInstruction()
+        private void Initialize()
         {
-            var instruction = Read(m_ip++);
-            int retcode;
-            int arg1, arg2, destination, result;
-            switch (instruction)
-            {
-                case 1:
-                    // Add two arguments and store in a third position.
-                    (arg1, arg2) = GrabTwoArguments(m_ip);
-                    m_ip += 2;
-                    result = arg1 + arg2;
-                    destination = Read(m_ip++);
-                    Write(destination, result);
-                    retcode = 1;
-                    break;
-                case 2:
-                    // Multiply two arguments and store in a third position.
-                    (arg1, arg2) = GrabTwoArguments(m_ip);
-                    m_ip += 2;
-                    result = arg1 * arg2;
-                    destination = Read(m_ip++);
-                    Write(destination, result);
-                    retcode = 1;
-                    break;
-                case 99:
-                    // Normal program termination - return 0.
-                    retcode = 0;
-                    break;
-                default:
-                    throw new Exception($"Error executing instruction {instruction} at position {m_ip - 1}. Unrecognised opcode.");
-            }
-
-            return retcode;
+            InputQueue = new Queue<int>();
+            OutputQueue = new Queue<int>();
+            mCore = new List<int>();
+            mIp = 0;
         }
 
         public int ExecuteProgram(int pos)
         {
-            m_ip = pos;
+            mIp = pos;
             var retcode = 1;
             while (retcode == 1)
             {
@@ -86,20 +49,128 @@ namespace aoc2019
             return retcode;
         }
 
-        private (int, int) GrabTwoArguments(int pos)
+        /*
+            Execute a single instruction at the current instruction pointer, m_ip.
+
+            Returns:
+            
+            1 if correctly executed, 
+            0 if program terminated normally,
+            -1 or other value if something went wrong.
+         */
+        private int ExecuteInstruction()
         {
-            int addr1, addr2;
-            (addr1, addr2) = GrabTwoAddresses(pos);
-            var arg1 = Read(addr1);
-            var arg2 = Read(addr2);
+            var instruction = Read(mIp++);
+            // Base opcode of the instruction.
+            int opcode = instruction % 100;
+            // Parameter modes for this instruction.
+            int pmodeArg1 = (instruction / 100) % 10;
+            int pmodeArg2 = (instruction / 1000) % 10;
+
+            int retcode = 1;
+            int arg1, arg2, destination, result;
+            switch (opcode)
+            {
+                case 1:
+                    // Add two arguments and store in a third position.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    result = arg1 + arg2;
+                    destination = Read(mIp++);
+                    Write(destination, result);
+                    break;
+                case 2:
+                    // Multiply two arguments and store in a third position.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    result = arg1 * arg2;
+                    destination = Read(mIp++);
+                    Write(destination, result);
+                    break;
+                case 3:
+                    // Input to a location in memory.
+                    result = InputQueue.Dequeue();
+                    destination = Read(mIp++);
+                    if (pmodeArg1 != 0)
+                    {
+                        throw new Exception($"Illegal parameter mode {pmodeArg1} for opcode {opcode}.");
+                    }
+                    Write(destination, result);
+                    break;
+                case 4:
+                    // Output from a location in memory.
+                    arg1 = Read(mIp++);
+                    result = (pmodeArg1 == 1) ? arg1 : Read(arg1);
+                    OutputQueue.Enqueue(result);
+                    break;
+                case 5:
+                    // Jump if true.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    if (arg1 != 0)
+                    {
+                        mIp = arg2;
+                    }
+
+                    break;
+                case 6:
+                    // Jump if false.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    if (arg1 == 0)
+                    {
+                        mIp = arg2;
+                    }
+
+                    break;
+                case 7:
+                    // Less than.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    destination = Read(mIp++);
+                    Write(destination, (arg1 < arg2) ? 1 : 0);
+                    break;
+                case 8:
+                    // Equals.
+                    (arg1, arg2) = GrabTwoArguments(mIp, pmodeArg1, pmodeArg2);
+                    mIp += 2;
+                    destination = Read(mIp++);
+                    Write(destination, (arg1 == arg2) ? 1 : 0);
+                    break;
+
+                case 99:
+                    // Normal program termination - return 0.
+                    retcode = 0;
+                    break;
+                default:
+                    throw new Exception($"Error executing instruction {instruction} at position {mIp - 1}. Unrecognised opcode.");
+            }
+
+            return retcode;
+        }
+
+        private (int, int) GrabTwoArguments(int pos, int pmode1, int pmode2)
+        {
+            var arg1 = GrabInputArgument(pos++, pmode1);
+            var arg2 = GrabInputArgument(pos, pmode2);
             return (arg1, arg2);
         }
 
-        private (int, int) GrabTwoAddresses(int pos)
+        private int GrabInputArgument(int pos, int pmode)
         {
-            var arg1 = Read(pos++);
-            var arg2 = Read(pos);
-            return (arg1, arg2);
+            var arg = Read(pos);
+            switch (pmode)
+            {
+                case 0:
+                    // Indirect mode.
+                    return Read(arg);
+                case 1:
+                    // Direct mode.
+                    return arg;
+                default:
+                    Console.WriteLine($"Unrecognised parameter mode {pmode} at position {pos}");
+                    return -1;
+            }
         }
 
         private void ReadFromFile(string fileName)
@@ -117,7 +188,9 @@ namespace aoc2019
 
         private void Clear()
         {
-            m_core.Clear();
+            mCore.Clear();
+            InputQueue.Clear();
+            OutputQueue.Clear();
         }
 
         private void AppendCodes(IEnumerable<string> codes)
@@ -129,7 +202,7 @@ namespace aoc2019
                 {
                     var numCode = int.Parse(code);
                     pos++;
-                    m_core.Add(numCode);
+                    mCore.Add(numCode);
                 }
             }
             catch (FormatException)
@@ -143,7 +216,7 @@ namespace aoc2019
         {
             try
             {
-                var value = m_core[pos];
+                var value = mCore[pos];
                 return value;
             }
             catch (Exception)
@@ -156,7 +229,7 @@ namespace aoc2019
         {
             try
             {
-                m_core[pos] = value;
+                mCore[pos] = value;
             }
             catch (Exception)
             {
@@ -164,13 +237,16 @@ namespace aoc2019
             }
         }
 
-        private List<int> m_core;
+        private List<int> mCore;
 
-        private int m_ip;
+        private int mIp;
+
+        public Queue<int> InputQueue { get; set; }
+        public Queue<int> OutputQueue { get; set; }
 
         public string StateString()
         {
-            return string.Join(',', m_core.Select(i => i.ToString()));
+            return string.Join(',', mCore.Select(i => i.ToString()));
         }
 
         public void Prime(int value1, int value2)
@@ -186,13 +262,13 @@ namespace aoc2019
 
         public List<int> SaveState()
         {
-            return m_core.ToList();
+            return mCore.ToList();
         }
 
         public void LoadState(List<int> state)
         {
-            m_core.Clear();
-            m_core.AddRange(state);
+            mCore.Clear();
+            mCore.AddRange(state);
         }
     }
 }

@@ -30,12 +30,12 @@ namespace aoc2019
             int length = 0;
             foreach (var move in moves)
             {
-                var count = move.length;
+                var count = move.Length;
                 while (count > 0)
                 {
                     length++;
-                    x += move.dx;
-                    y += move.dy;
+                    x += move.Dx;
+                    y += move.Dy;
                     if (Seen.ContainsKey((x, y)))
                     {
                         intersections.Add((x, y));

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace aoc2019
 {
@@ -11,6 +10,7 @@ namespace aoc2019
         private const string InputFile1 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input1.txt";
         private const string InputFile2 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input2.txt";
         private const string InputFile3 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input3.txt";
+        private const string InputFile5 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input5.txt";
 
         static void Main()
         {
@@ -21,8 +21,10 @@ namespace aoc2019
             Day1Part2();
             Day2Part1();
             Day2Part2();
-*/
             Day3();
+*/
+            Day5Part1();
+            Day5Part2();
         }
 
         private static void Day1Part1()
@@ -165,6 +167,42 @@ namespace aoc2019
 
             Console.WriteLine($"Part 2: Closest crossing at distance {minDistance}, location: {minCrossing}.");
 
+        }
+
+        private static void Day5Part1()
+        {
+            var computer = new Computer(InputFile5);
+            // Set up user input of 1.
+            computer.InputQueue.Enqueue(1);
+            // Run program.
+            computer.ExecuteProgram(0);
+            // Read output.
+            Console.WriteLine($"Day 5, Part 1. Outputs:");
+            while (computer.OutputQueue.Count > 0)
+            {
+                Console.WriteLine(computer.OutputQueue.Dequeue());
+            }
+
+            Console.Write("Hit return to quit");
+            Console.ReadLine();
+        }
+
+        private static void Day5Part2()
+        {
+            var computer = new Computer(InputFile5);
+            // Set up user input of 1.
+            computer.InputQueue.Enqueue(5);
+            // Run program.
+            computer.ExecuteProgram(0);
+            // Read output.
+            Console.WriteLine($"Day 5, Part 2. Outputs:");
+            while (computer.OutputQueue.Count > 0)
+            {
+                Console.WriteLine(computer.OutputQueue.Dequeue());
+            }
+
+            Console.Write("Hit return to quit");
+            Console.ReadLine();
         }
 
         private static int Manhattan((int, int) point1, (int, int) point2)
