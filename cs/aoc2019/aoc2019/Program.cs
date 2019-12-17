@@ -205,6 +205,51 @@ namespace aoc2019
             Console.ReadLine();
         }
 
+        const string[] AmplifierNames = { "A", "B", "C", "D", "E" };
+
+        public static Day7Part1()
+        {
+            var amplifiers = SetupAmplifiers();
+
+        }
+
+        private static Dictionary<string, Computer> SetupAmplifiers(string fileName, int[] phaseSettings)
+        {
+            var amplifiers = new Dictionary<string, Computer>();
+            int i = 0;
+            foreach (string n in AmplifierNames)
+            {
+                var c = new Computer(fileName);
+                c.InputQueue.Enqueue(phaseSettings[i++]);
+                amplifiers[n] = c;
+
+            }
+            return amplifiers;
+        }
+
+        private static Set<List<int>> Expand(Set<List<int>> inputSet, List<int> options)
+        {
+            Set<List<int>> newItems = new Set<List<int>>();
+            foreach (var sofar in inputSet)
+            {
+                var remaining = options.Select(s => !sofar.Contains(s));
+                foreach (var extension in remaining)
+                {
+                    newItems.Add(sofar)
+                }
+            }
+
+        }
+
+        private static List<List<int>> Permutations(int[] inputs)
+        {
+            // Compute all the permutations of the items in the input array.
+
+            
+
+
+        }
+
         private static int Manhattan((int, int) point1, (int, int) point2)
         {
             var d = Math.Abs(point1.Item1 - point2.Item1);
@@ -251,5 +296,6 @@ namespace aoc2019
 
             return fuelTotal;
         }
+
     }
 }
