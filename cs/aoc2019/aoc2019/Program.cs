@@ -11,18 +11,17 @@ namespace aoc2019
         private const string InputFile2 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input2.txt";
         private const string InputFile3 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input3.txt";
         private const string InputFile5 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input5.txt";
+        private const string InputFile7 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input7.txt";
 
         static void Main()
         {
             Console.WriteLine("Advent of Code 2019");
 
-/*
             Day1Part1();
             Day1Part2();
             Day2Part1();
             Day2Part2();
             Day3();
-*/
             Day5Part1();
             Day5Part2();
         }
@@ -43,6 +42,19 @@ namespace aoc2019
             Console.ReadLine();
         }
 
+        private static int[] ReadInputMasses()
+        {
+            var lines = File.ReadAllLines(InputFile1);
+            var masses = lines.Select(l => int.Parse(l.Trim()));
+            return masses.ToArray();
+        }
+
+        public static int FuelRequired(int mass)
+        {
+            var fuel = (mass / 3) - 2;
+            return (fuel > 0 ? fuel : 0);
+        }
+
         private static void Day1Part2()
         {
             Console.WriteLine("Day 1, Part 2:\n");
@@ -52,6 +64,19 @@ namespace aoc2019
             Console.WriteLine($"Total fuel required = {fuelTotal}");
             Console.Write("Hit return to quit");
             Console.ReadLine();
+        }
+
+        public static int FullyFuelRequired(int moduleMass)
+        {
+            var fuelRequired = FuelRequired(moduleMass);
+            var fuelTotal = fuelRequired;
+            while (fuelRequired > 0)
+            {
+                fuelRequired = FuelRequired(fuelRequired);
+                fuelTotal += fuelRequired;
+            }
+
+            return fuelTotal;
         }
 
         private static void Day2Part1()
@@ -169,6 +194,27 @@ namespace aoc2019
 
         }
 
+        private static Dictionary<(int, int), int> Intersections(Path firstPath, Path secondPath)
+        {
+            var result = new Dictionary<(int, int), int>();
+            foreach (var p in firstPath.Seen.Keys)
+            {
+                if (secondPath.Seen.ContainsKey(p))
+                {
+                    result[p] = firstPath.Seen[p] + secondPath.Seen[p];
+                }
+            }
+
+            return result;
+        }
+
+        private static int Manhattan((int, int) point1, (int, int) point2)
+        {
+            var d = Math.Abs(point1.Item1 - point2.Item1);
+            d += Math.Abs(point1.Item2 - point2.Item2);
+            return d;
+        }
+
         private static void Day5Part1()
         {
             var computer = new Computer(InputFile5);
@@ -205,11 +251,11 @@ namespace aoc2019
             Console.ReadLine();
         }
 
-        const string[] AmplifierNames = { "A", "B", "C", "D", "E" };
+        readonly string[] amplifierNames = { "A", "B", "C", "D", "E"};
 
         public static Day7Part1()
         {
-            var amplifiers = SetupAmplifiers();
+            var amplifiers = SetupAmplifiers(InputFile7, );
 
         }
 
@@ -217,7 +263,7 @@ namespace aoc2019
         {
             var amplifiers = new Dictionary<string, Computer>();
             int i = 0;
-            foreach (string n in AmplifierNames)
+            foreach (string n in amplifierNames)
             {
                 var c = new Computer(fileName);
                 c.InputQueue.Enqueue(phaseSettings[i++]);
@@ -235,7 +281,7 @@ namespace aoc2019
                 var remaining = options.Select(s => !sofar.Contains(s));
                 foreach (var extension in remaining)
                 {
-                    newItems.Add(sofar)
+//                    newItems.Add(sofar)
                 }
             }
 
@@ -250,52 +296,40 @@ namespace aoc2019
 
         }
 
-        private static int Manhattan((int, int) point1, (int, int) point2)
+
+<<<<<<< Updated upstream
+=======
+        public static IEnumerable<List<int>> Permutation(List<int> source)
         {
-            var d = Math.Abs(point1.Item1 - point2.Item1);
-            d += Math.Abs(point1.Item2 - point2.Item2);
-            return d;
+            // Construct and yield a permutation of the given list.
+
         }
 
-        private static Dictionary<(int, int), int> Intersections(Path firstPath, Path secondPath)
+        private static List<List<int>> GrowPermutations(List<int> seen, List<int> options)
         {
-            var result = new Dictionary<(int, int), int>();
-            foreach (var p in firstPath.Seen.Keys)
+            var result = new List<List<int>>();
+            if (options.Count() == 0)
             {
-                if (secondPath.Seen.ContainsKey(p))
-                {
-                    result[p] = firstPath.Seen[p] + secondPath.Seen[p];
-                }
+                result.Add(seen);
+                return result;
+            }
+
+            var newOptions = options;
+            foreach (var option in options)
+            {
+                TransferItem(option, newOptions, seen);
+                result.AddRange(GrowPermutations(seen, newOptions));
+                TransferItem(option, seen, newOptions);
             }
 
             return result;
         }
 
-        private static int[] ReadInputMasses()
+        private static void TransferItem(int option, List<int> newOptions, List<int> seen)
         {
-            var lines = File.ReadAllLines(InputFile1);
-            var masses = lines.Select(l => int.Parse(l.Trim()));
-            return masses.ToArray();
+            newOptions.Remove(option);
+            seen.Add(option);
         }
-
-        public static int FuelRequired(int mass)
-        {
-            var fuel = (mass / 3) - 2;
-            return (fuel > 0 ? fuel : 0);
-        }
-
-        public static int FullyFuelRequired(int moduleMass)
-        {
-            var fuelRequired = FuelRequired(moduleMass);
-            var fuelTotal = fuelRequired;
-            while (fuelRequired > 0)
-            {
-                fuelRequired = FuelRequired(fuelRequired);
-                fuelTotal += fuelRequired;
-            }
-
-            return fuelTotal;
-        }
-
+>>>>>>> Stashed changes
     }
 }
