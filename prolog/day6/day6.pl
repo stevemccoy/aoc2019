@@ -1,6 +1,9 @@
 %
-% Day 6 Solution 
+% Advent of Code 2019 - Day 6 
 % 
+
+:- working_directory(_, 'c:/src/github/aoc2019/prolog/day6/').
+
 
 identifier_char(Cout) -->
 	[Cin],
