@@ -94,15 +94,12 @@ read_input_string(String) :-
 % shopping_list(Products, Reactants).
 % Transform required list of products into required list of reactants.
 shopping_list([], []).
-shopping_list([Product | Tail], Reactants) :-
-	how_to_make(Product, Requirements),
-	!,
-	merge_lists(Tail, Requirements, Tail2),
-	shopping_list(Tail2, Reactants).
-% Product cannot be produced by a reactant.
-shopping_list([Product | Tail], Result) :-
-	shopping_list(Tail, Reactants),
-	merge_lists([Product], Reactants, Result).
+shopping_list([Product | Others], Result) :-
+	how_to_make(Product, Reactants),
+	shopping_list(Others, OtherReactants),
+	conc(Reactants, OtherReactants, Result).
+shopping_list([Product | Others], [Product | OtherReactants]) :-
+	shopping_list(Others, OtherReactants).
 
 % Determine required reactants to produce single product at a given quantity.
 how_to_make(Product, Reqts) :-
@@ -122,6 +119,34 @@ reactants_times([R1 | Rest1], Factor, [R2 | Rest2]) :-
 	Qty2 is Qty1 * Factor,
 	R2 =.. [Name, Qty2],
 	reactants_times(Rest1, Factor, Rest2).
+
+
+boil_down(Products, Result) :-
+	shopping_list(Products, RList1),
+	not(permutation(Products, RList1)),
+	!,
+	merge_lists(RList1, [], RList2),
+	boil_down(RList2, Result).
+boil_down(Products, Products).
+
+
+
+% reactants --> products.
+
+
+Reactants, ByStanders --> Product, OtherObjectives, ByProducts
+
+
+
+
+
+
+% Reorder the elements of one list into another.	
+permutation([], []).
+permutation([Head | Tail], PermList) :-
+	permutation(Tail, PermTail),
+	del(Head, PermList, PermTail).
+
 
 merge_lists(List1, List2, Result) :-
 	conc(List1, List2, List3),
@@ -165,7 +190,7 @@ day14_test1 :-
 7 A, 1 C => 1 D
 7 A, 1 D => 1 E
 7 A, 1 E => 1 FUEL"),
-	shopping_list([fuel(1)], L),
+	boil_down([fuel(1)], L),
 	writeln(L).
 
 day14_test2 :-
@@ -176,7 +201,7 @@ day14_test2 :-
 5 B, 7 C => 1 BC
 4 C, 1 A => 1 CA
 2 AB, 3 BC, 4 CA => 1 FUEL"),
-	shopping_list([fuel(1)], L),
+	boil_down([fuel(1)], L),
 	writeln(L).
 
 day14_test3 :-
@@ -189,7 +214,7 @@ day14_test3 :-
 7 DCFZ, 7 PSHF => 2 XJWVT
 165 ORE => 2 GPVTF
 3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"),
-	shopping_list([fuel(1)], L),
+	boil_down([fuel(1)], L),
 	writeln(L).
 
 
