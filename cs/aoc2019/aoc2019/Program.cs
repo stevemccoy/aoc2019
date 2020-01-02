@@ -17,6 +17,7 @@ namespace aoc2019
         {
             Console.WriteLine("Advent of Code 2019");
 
+/*
             Day1Part1();
             Day1Part2();
             Day2Part1();
@@ -24,6 +25,25 @@ namespace aoc2019
             Day3();
             Day5Part1();
             Day5Part2();
+*/
+
+            Day7Part1();
+//            TestPermutations();
+        }
+
+        private static void TestPermutations()
+        {
+            var options = new List<int>() {1, 2, 3, 4, 5, 6};
+            var permutations = Permutations(new List<int>(), options).ToList();
+            foreach (var option in permutations)
+            {
+                foreach (var i in option)
+                {
+                    Console.Write(i);
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine($"Number of permutations: {permutations.Count()}");
         }
 
         private static void Day1Part1()
@@ -251,85 +271,53 @@ namespace aoc2019
             Console.ReadLine();
         }
 
-        readonly string[] amplifierNames = { "A", "B", "C", "D", "E"};
-
-        public static Day7Part1()
+        public static void Day7Part1()
         {
-            var amplifiers = SetupAmplifiers(InputFile7, );
-
-        }
-
-        private static Dictionary<string, Computer> SetupAmplifiers(string fileName, int[] phaseSettings)
-        {
-            var amplifiers = new Dictionary<string, Computer>();
-            int i = 0;
-            foreach (string n in amplifierNames)
+            var actualMaxThrust = 0;
+            var reader = new StreamReader(InputFile7);
+            var program = reader.ReadToEnd();
+            reader.Close();
+            foreach (var phaseSettings in Permutations(new int[] { 0, 1, 2, 3, 4 }))
             {
-                var c = new Computer(fileName);
-                c.InputQueue.Enqueue(phaseSettings[i++]);
-                amplifiers[n] = c;
-
-            }
-            return amplifiers;
-        }
-
-        private static Set<List<int>> Expand(Set<List<int>> inputSet, List<int> options)
-        {
-            Set<List<int>> newItems = new Set<List<int>>();
-            foreach (var sofar in inputSet)
-            {
-                var remaining = options.Select(s => !sofar.Contains(s));
-                foreach (var extension in remaining)
+                var bank = new AmplifierBank(program, phaseSettings);
+                var thrust = bank.Run();
+                if (thrust > actualMaxThrust)
                 {
-//                    newItems.Add(sofar)
+                    actualMaxThrust = thrust;
                 }
             }
 
+            Console.WriteLine("Analysis complete.");
+            Console.WriteLine($"Maximum thrust = {actualMaxThrust}");
         }
 
-        private static List<List<int>> Permutations(int[] inputs)
+        public static IEnumerable<List<T>> Permutations<T>(IEnumerable<T> options)
         {
-            // Compute all the permutations of the items in the input array.
-
-            
-
-
+            return Permutations(new List<T>(), options.ToList());
         }
 
-
-<<<<<<< Updated upstream
-=======
-        public static IEnumerable<List<int>> Permutation(List<int> source)
+        public static IEnumerable<List<T>> Permutations<T>(List<T> sofar, List<T> options)
         {
-            // Construct and yield a permutation of the given list.
-
-        }
-
-        private static List<List<int>> GrowPermutations(List<int> seen, List<int> options)
-        {
-            var result = new List<List<int>>();
-            if (options.Count() == 0)
+            if (options.Any())
             {
-                result.Add(seen);
-                return result;
-            }
+                var newOptions = new List<T>(options);
+                foreach (var option in options)
+                {
+                    var path = new List<T>(sofar) {option};
 
-            var newOptions = options;
-            foreach (var option in options)
+                    newOptions.Remove(option);
+                    foreach (var permutation in Permutations(path, newOptions))
+                    {
+                        yield return permutation;
+                    }
+                    newOptions.Add(option);
+                }
+            }
+            else
             {
-                TransferItem(option, newOptions, seen);
-                result.AddRange(GrowPermutations(seen, newOptions));
-                TransferItem(option, seen, newOptions);
+                yield return sofar;
             }
-
-            return result;
         }
 
-        private static void TransferItem(int option, List<int> newOptions, List<int> seen)
-        {
-            newOptions.Remove(option);
-            seen.Add(option);
-        }
->>>>>>> Stashed changes
     }
 }

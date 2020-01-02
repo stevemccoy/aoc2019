@@ -7,6 +7,11 @@ namespace aoc2019
 {
     public class Computer
     {
+        public Computer()
+        {
+            Initialize();
+        }
+
         public Computer(string fileName)
         {
             Initialize();
@@ -31,10 +36,20 @@ namespace aoc2019
         public int ExecuteProgram(int pos)
         {
             mIp = pos;
+            return ResumeProgram();
+        }
+
+        public int ResumeProgram()
+        {
             var retcode = 1;
-            while (retcode == 1)
+            while (retcode > 0)
             {
                 retcode = ExecuteInstruction();
+                if (retcode == 2)
+                {
+                    Console.WriteLine($"Program paused pending input at address: {mIp}");
+                    return retcode;
+                }
             }
 
             if (retcode == 0)
@@ -55,6 +70,7 @@ namespace aoc2019
             Returns:
             
             1 if correctly executed, 
+            2 if program halted pending input not available yet,
             0 if program terminated normally,
             -1 or other value if something went wrong.
          */
@@ -89,6 +105,12 @@ namespace aoc2019
                     break;
                 case 3:
                     // Input to a location in memory.
+                    if (InputQueue.Count == 0)
+                    {
+                        mIp--;
+                        retcode = 2;
+                        break;
+                    }
                     result = InputQueue.Dequeue();
                     destination = Read(mIp++);
                     if (pmodeArg1 != 0)
@@ -180,10 +202,15 @@ namespace aoc2019
             while (!file.EndOfStream)
             {
                 var line = file.ReadLine();
-                var lineCodes = line?.Trim().Split(',').Select(s => s.Trim());
+                var lineCodes = CodesFromString(line);
                 AppendCodes(lineCodes);
             }
             file.Close();
+        }
+
+        private static IEnumerable<string> CodesFromString(string line)
+        {
+            return line?.Trim().Split(',').Select(s => s.Trim());
         }
 
         private void Clear()
@@ -269,6 +296,13 @@ namespace aoc2019
         {
             mCore.Clear();
             mCore.AddRange(state);
+        }
+
+        public void LoadProgram(string program)
+        {
+            Clear();
+            var codes = CodesFromString(program);
+            AppendCodes(codes);
         }
     }
 }
