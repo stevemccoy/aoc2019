@@ -12,23 +12,72 @@ namespace aoc2019
         private const string InputFile3 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input3.txt";
         private const string InputFile5 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input5.txt";
         private const string InputFile7 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input7.txt";
+        private const string InputFile8 = @"C:\src\github\aoc2019\cs\aoc2019\aoc2019\input\input8.txt";
 
         static void Main()
         {
             Console.WriteLine("Advent of Code 2019");
 
-/*
-            Day1Part1();
-            Day1Part2();
-            Day2Part1();
-            Day2Part2();
-            Day3();
-            Day5Part1();
-            Day5Part2();
-*/
+            /*
+                        Day1Part1();
+                        Day1Part2();
+                        Day2Part1();
+                        Day2Part2();
+                        Day3();
+                        Day5Part1();
+                        Day5Part2();
 
-            Day7Part1();
-//            TestPermutations();
+                        Day7Part1();
+                        Day7Part2();
+            */
+            Day8Part1();
+
+        }
+
+        private static void Day8Part1()
+        {
+            Console.WriteLine("Day 8, Part 1");
+            var charsPerFrame = 25 * 6;
+            var chars = string.Join("", File.ReadAllLines(InputFile8)).Where(char.IsDigit).ToArray();
+            var numChars = chars.Length;
+            var offset = 0;
+            List<Tuple<int, int, int>> results = new List<Tuple<int, int, int>>();
+            var frame = new Char[charsPerFrame];
+            var minZeroes = int.MaxValue;
+            var indexMinZeroes = int.MaxValue;
+            var index = 0;
+
+            while (offset < numChars)
+            {
+                Array.Copy(chars, offset, frame, 0, charsPerFrame);
+                var zeroes = frame.Count(c => c.Equals('0'));
+                var ones = frame.Count(c => c.Equals('1'));
+                var twos = frame.Count(c => c.Equals('2'));
+                var t = new Tuple<int, int, int>(zeroes, ones, twos);
+                results.Add(t);
+                offset += charsPerFrame;
+                if (zeroes < minZeroes)
+                {
+                    minZeroes = zeroes;
+                    indexMinZeroes = index;
+                }
+
+                index++;
+            }
+
+            int product;
+            foreach (var result in results)
+            {
+                product = result.Item2 * result.Item3;
+                Console.WriteLine($"Zeroes:{result.Item1}, Ones:{result.Item2}, Twos:{result.Item3}, Product:{product}");
+            }
+
+            product = results[indexMinZeroes].Item2 * results[indexMinZeroes].Item3;
+            Console.WriteLine($"Minimum zeroes for index: {indexMinZeroes}, with product {product}");
+
+            Console.WriteLine($"No chars {numChars}");
+            Console.Write("Hit return to quit");
+            Console.ReadLine();
         }
 
         private static void TestPermutations()
@@ -273,6 +322,7 @@ namespace aoc2019
 
         public static void Day7Part1()
         {
+            Console.WriteLine("Day 7, Part 1");
             var actualMaxThrust = 0;
             var reader = new StreamReader(InputFile7);
             var program = reader.ReadToEnd();
@@ -280,7 +330,28 @@ namespace aoc2019
             foreach (var phaseSettings in Permutations(new int[] { 0, 1, 2, 3, 4 }))
             {
                 var bank = new AmplifierBank(program, phaseSettings);
-                var thrust = bank.Run();
+                var thrust = bank.Run(false);
+                if (thrust > actualMaxThrust)
+                {
+                    actualMaxThrust = thrust;
+                }
+            }
+
+            Console.WriteLine("Analysis complete.");
+            Console.WriteLine($"Maximum thrust = {actualMaxThrust}");
+        }
+
+        public static void Day7Part2()
+        {
+            Console.WriteLine("Day 7, Part 2");
+            var actualMaxThrust = 0;
+            var reader = new StreamReader(InputFile7);
+            var program = reader.ReadToEnd();
+            reader.Close();
+            foreach (var phaseSettings in Permutations(new int[] {5, 6, 7, 8, 9}))
+            {
+                var bank = new AmplifierBank(program, phaseSettings);
+                var thrust = bank.Run(true);
                 if (thrust > actualMaxThrust)
                 {
                     actualMaxThrust = thrust;

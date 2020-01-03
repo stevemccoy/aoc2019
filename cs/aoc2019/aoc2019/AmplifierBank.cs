@@ -19,17 +19,33 @@ namespace aoc2019
             }
         }
 
-        public int Run()
+        public int Run(bool withFeedback)
         {
-            // Need to incorporate feedback into the amplifier banks...
-
-
             var signal = 0;
             for (var i = 0; i < NumStages; i++)
             {
                 amplifiers[i].InputQueue.Enqueue(signal);
                 amplifiers[i].ExecuteProgram(0);
                 signal = amplifiers[i].OutputQueue.Dequeue();
+            }
+
+            if (withFeedback)
+            {
+                bool done = false;
+                while (!done)
+                {
+                    for (var i = 0; i < NumStages; i++)
+                    {
+                        amplifiers[i].InputQueue.Enqueue(signal);
+                        var retcode = amplifiers[i].ResumeProgram();
+                        if (retcode != 2)
+                        {
+                            done = true;
+                        }
+
+                        signal = amplifiers[i].OutputQueue.Dequeue();
+                    }
+                }
             }
 
             return signal;
